@@ -97,25 +97,105 @@ function reorderShoots(from,to){
   data.allOrder=data.shoots.map(s=>s.id);
   change();render();
 }
+let query = '';
+const folded = new Set();
+async function asWebP(file) {
+  const bitmap = await createImageBitmap(file);
+  try {
+    if (file.type === 'image/webp') {
+      const header = await file.slice(0, 12).text();
+      if (header.startsWith('RIFF') && header.endsWith('WEBP')) return file;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d');
+    if (!context) throw Error('Недостаточно памяти для обработки фотографии.');
+    context.drawImage(bitmap, 0, 0);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.95));
+    if (blob?.type !== 'image/webp') {
+      throw Error('Браузер не смог создать WebP. Откройте панель в Arc или Chrome либо выберите готовый WebP.');
+    }
+    return blob;
+  } finally {
+    bitmap.close();
+  }
+}
+function imageUrl(file) {
+  if (photos[file] && !urls[file]) urls[file] = URL.createObjectURL(photos[file]);
+  return urls[file] || '../assets/' + encodeURIComponent(file);
+}
+function openEditor() {
+  render();
+  if (matchMedia('(max-width: 760px)').matches) $('edit').scrollIntoView({block:'start'});
+}
+function frameDrag(card, handle, index, reorder) {
+  handle.onpointerdown = event => {
+    if (event.button !== 0) return;
+    handle.setPointerCapture(event.pointerId);
+    card.classList.add('moving');
+    let target;
+    function track(e) {
+      if (e.clientY > innerHeight - 64) window.scrollBy(0, 24);
+      if (e.clientY < 64) window.scrollBy(0, -24);
+      target?.classList.remove('target');
+      target = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-frame]');
+      target?.classList.add('target');
+    }
+    function finish(e) {
+      handle.onpointermove = handle.onpointerup = handle.onpointercancel = handle.onlostpointercapture = null;
+      target?.classList.remove('target');card.classList.remove('moving');
+      if (e.type === 'pointerup' && target && target !== card) reorder(index,Number(target.dataset.frame));
+    }
+    handle.onpointermove = track;
+    handle.onpointerup = handle.onpointercancel = handle.onlostpointercapture = finish;
+  };
+  handle.onkeydown = e => {
+    if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return;
+    e.preventDefault();
+    const next=index+(['ArrowLeft','ArrowUp'].includes(e.key)?-1:1);
+    if (!card.parentNode.children[next]) return;
+    reorder(index,next);
+    document.querySelector('[data-frame="'+next+'"] .grip')?.focus();
+  };
+}
 function drawMenu() {
   const menu=$('menu');menu.replaceChildren();
   if(mode==='price'){
     el('h2','Виды съёмок',menu);
     for(const [id,s] of Object.entries(data.conditions)){
-      const b=button(menu,s.title.join(' '),()=>{service=id;render();});
+      const b=button(menu,s.title.join(' '),()=>{service=id;openEditor();});
       b.setAttribute('aria-pressed',id===service);
     }
     return;
   }
   el('h2','Съёмки',menu);
+  const search=el('input',null,menu); search.type='search';search.placeholder='Поиск съёмки или категории';search.ariaLabel=search.placeholder;search.value=query;
   button(menu,'+ Новая съёмка',()=>{
     const s={id:crypto.randomUUID(),category:Object.keys(data.categories)[0],name:'Новая съёмка',cover:'',frames:[]};
-    data.shoots.push(s);data.allOrder.push(s.id);selected=s.id;change();render();
+    data.shoots.push(s);data.allOrder.push(s.id);selected=s.id;query='';folded.delete(s.category);change();openEditor();
   });
-  data.shoots.forEach((s,i)=>{
-    const b=button(menu,s.name||'Без названия',()=>{selected=s.id;render();});
-    b.setAttribute('aria-pressed',s.id===selected);ordered(b,'shoot',i,reorderShoots);
-  });
+  const groups=el('div',null,menu);
+  function filter() {
+    groups.replaceChildren();
+    const term=query.trim().toLocaleLowerCase('ru');
+    for (const [id,label] of Object.entries(data.categories)) {
+      const matches=data.shoots.filter(s=>s.category===id && (label+' '+s.name).toLocaleLowerCase('ru').includes(term));
+      if (!matches.length) continue;
+      const section=el('details',null,groups);section.open=!!term || !folded.has(id);
+      section.ontoggle=()=>{if (!term && section.isConnected) section.open?folded.delete(id):folded.add(id);};
+      const summary=el('summary',label,section);el('small',String(matches.length),summary);
+      for (const s of matches) {
+        const b=button(section,'',()=>{selected=s.id;openEditor();});
+        if(s.cover){const img=el('img',null,b);img.alt='';img.src=imageUrl(s.cover);}
+        el('span',s.name||'Без названия',b);b.setAttribute('aria-pressed',s.id===selected);
+        ordered(b,'shoot',data.shoots.indexOf(s),reorderShoots);
+      }
+    }
+    if(!groups.children.length)el('p',term?'Съёмок по этому запросу нет.':'Добавьте первую съёмку.',groups);
+  }
+  search.oninput=()=>{query=search.value;filter();};
+  filter();
 }
 function render() {
   drawMenu();const panel=$('edit');panel.replaceChildren();
@@ -124,11 +204,11 @@ function render() {
   if(mode==='price'){drawPrice(panel);return;}
   const index=data.shoots.findIndex(s=>s.id===selected),s=data.shoots[index];
   if(!s)return;
-  el('h2','Карточка съёмки',panel);
-  field(panel,'Название в списке',s.name,v=>{s.name=v;drawMenu();});
+  const title=el('h2',s.name,panel);
+  field(panel,'Название в списке',s.name,v=>{s.name=v;title.textContent=v||'Без названия';drawMenu();});
   const l=el('label','Категория',panel),select=el('select',null,l);
   for(const [key,label] of Object.entries(data.categories)){const o=el('option',label,select);o.value=key;}
-  select.value=s.category;select.onchange=()=>{s.category=select.value;change();};
+  select.value=s.category;select.onchange=()=>{s.category=select.value;folded.delete(s.category);change();drawMenu();};
   const tools=controls(panel);
   button(tools,'+ Категория',()=>{const name=prompt('Название новой категории')?.trim();if(!name)return;
     const key='cat-'+crypto.randomUUID();data.categories[key]=name;s.category=key;change();render();});
@@ -138,41 +218,50 @@ function render() {
     data.shoots.splice(index,1);data.allOrder=data.allOrder.filter(id=>id!==s.id);selected=data.shoots[0]?.id;change();render();});
   const frames=s.frames??[s.cover];
   el('h3','Фотографии',panel);
-  const upload=el('input',null,panel);upload.type='file';upload.multiple=true;upload.accept='image/jpeg,image/png,image/webp';upload.setAttribute('aria-label','Добавить фотографии');
-  upload.onchange=async()=>{
-    const files=[...upload.files];$('workspace').inert=true;
+  const drop=el('label',null,panel);drop.className='drop';el('strong','Добавить фотографии',drop);el('small','Перетащите файлы сюда или выберите на устройстве',drop);const upload=el('input',null,drop);upload.type='file';upload.multiple=true;upload.accept='image/jpeg,image/png,image/webp';upload.setAttribute('aria-label','Добавить фотографии');
+  upload.onchange=()=>addFiles([...upload.files]);
+  drop.ondragover=e=>{if(e.dataTransfer.types.includes('Files')){e.preventDefault();drop.classList.add('over');}};
+  drop.ondragleave=()=>drop.classList.remove('over');
+  drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files.length)addFiles([...e.dataTransfer.files]);};
+  async function addFiles(files){$('workspace').inert=true;
     try{for(const f of files){
       const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[f.type];
       if(!ext || f.size>25*1024*1024)throw Error('Выберите JPEG, PNG или WebP до 25 МБ на фотографию.');
-      const bitmap=await createImageBitmap(f);bitmap.close();
-      const key=crypto.randomUUID()+'.'+ext;photos[key]=f;frames.push(key);s.frames=frames;if(!s.cover)s.cover=key;change();
+      status('Подготовка WebP · '+f.name);
+      const webp=await asWebP(f);
+      const key=crypto.randomUUID()+'.webp';photos[key]=webp;frames.push(key);s.frames=frames;if(!s.cover)s.cover=key;change();
     }}catch(e){status(e.message);}finally{$('workspace').inert=false;render();}
   };
   const grid=el('div',null,panel);grid.className='grid';
   function reorder(from,to){move(frames,from,to);s.frames=frames;change();render();}
   frames.forEach((file,i)=>{
-    const card=el('div',null,grid);card.className='card';ordered(card,'frame',i,reorder);
+    const card=el('div',null,grid);card.className='card';card.dataset.frame=i;
     const img=el('img',null,card);img.draggable=false;img.alt='Кадр '+(i+1);
-    img.src=urls[file] || (photos[file]?(urls[file]??=URL.createObjectURL(photos[file])):'../assets/'+encodeURIComponent(file));
+    img.src=imageUrl(file);
     el('small',(i+1)+(file===s.cover?' · Обложка':''),card);
     const c=controls(card);
-    button(c,'←',()=>reorder(i,i-1),i===0).ariaLabel='Передвинуть кадр раньше';
-    button(c,'→',()=>reorder(i,i+1),i===frames.length-1).ariaLabel='Передвинуть кадр позже';
+    const handle=button(card,'⠿',()=>{});handle.className='grip';
+    handle.ariaLabel='Перетащить кадр '+(i+1);handle.title='Перетащите кадр или используйте клавиши со стрелками';
+    frameDrag(card,handle,i,reorder);
+    ordered(img,'frame',i,reorder);
     button(c,'Обложка',()=>{s.cover=file;change();render();},file===s.cover);
     button(c,'Убрать',()=>{frames.splice(i,1);s.frames=frames;if(!frames.includes(s.cover))s.cover=frames[0]||'';change();render();});
   });
 }
 function drawPrice(panel){
-  const s=data.conditions[service];el('h2','Прайс',panel);
+  const s=data.conditions[service];el('h2',s.title.join(' '),panel);
+  el('h3','Название и стоимость',panel);
   field(panel,'Заголовок · каждая строка отдельно',s.title.join('\n'),v=>{s.title=v.split('\n');drawMenu();},true);
   field(panel,'Стоимость и вводный текст',s.intro,v=>s.intro=v,true);
+  el('h3','Условия съёмки',panel);
   s.sections.forEach((pair,i)=>{
-    const n=el('section',null,panel);n.className='block';
-    field(n,'Подзаголовок',pair[0],v=>pair[0]=v);
+    const n=el('details',null,panel);n.className='block';n.open=i===0||!pair[0];const heading=el('summary',pair[0]||'Новый блок',n);
+    field(n,'Подзаголовок',pair[0],v=>{pair[0]=v;heading.textContent=v||'Новый блок';});
     field(n,'Описание',pair[1],v=>pair[1]=v,true);
     button(n,'Удалить блок',()=>{s.sections.splice(i,1);change();render();});
   });
   button(panel,'+ Блок прайса',()=>{s.sections.push(['','']);change();render();});
+  el('h3','Примечание',panel);
   field(panel,'Заголовок примечания',s.footerTitle,v=>s.footerTitle=v||null);
   field(panel,'Примечание · пустая строка разделяет абзацы',s.footer.join('\n\n'),v=>s.footer=v.split('\n\n'),true);
 }
