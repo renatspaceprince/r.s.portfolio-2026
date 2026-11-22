@@ -56,8 +56,8 @@ const portfolioContent = {
     "editorial-01",
     "nastya-venya",
     "catalog-01",
-    "editorial-01",
-    "kristina-demidova"
+    "catalog-02",
+    "food-01"
   ],
   "conditions": {
     "personal": {

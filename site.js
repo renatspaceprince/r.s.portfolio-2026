@@ -7,7 +7,9 @@ const escapeText = value => value.replace(/[&<>"']/g, char => ({
 const { categories, shoots, conditions, allOrder } = JSON.parse(
   JSON.stringify(portfolioContent), (_, value) => typeof value === 'string' ? escapeText(value) : value
 );
-const allWorks = allOrder.map(id => shoots.find(item => item.id === id)).filter(Boolean);
+const shootsById = new Map(shoots.map(shoot => [shoot.id, shoot]));
+const orderedIds = new Set([...allOrder, ...shootsById.keys()]);
+const allWorks = Array.from(orderedIds, id => shootsById.get(id)).filter(Boolean);
 
 const servicePreviews = {
   personal: ['kristina-2-hd.jpg', 'personal-2-hd.jpg', 'kristina-3-hd.jpg', 'kristina-cover-hd.jpg'],
