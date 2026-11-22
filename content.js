@@ -13,18 +13,38 @@ const portfolioContent = {
       "cover": "kristina-cover-hd.jpg",
       "frames": [
         "kristina-cover-hd.jpg",
-        "kristina-2-hd.jpg",
-        "kristina-3-hd.jpg",
-        "kristina-4-hd.jpg",
-        "kristina-5-hd.jpg",
-        "kristina-cover-hd.jpg"
+        "8b2c9b6c-5d91-41dd-9af2-7bcb4a9f5b5b.webp",
+        "cf7cfb72-fa80-46b4-82fc-94b310698bbc.webp",
+        "4f017992-c524-4dc9-b6e0-ebb93f5da798.webp",
+        "7436a8d0-edb2-4852-ac54-2577d0b9ed94.webp",
+        "557328c4-692f-453a-a7a3-ce15b58e63bd.webp",
+        "e352cc89-8bed-43ef-aba7-9d1289e88fe4.webp",
+        "3da1beea-9a51-4e34-b999-950db57202c7.webp",
+        "1943afc1-0b68-4b66-953a-7a9abbca36e6.webp",
+        "5e0eca72-295e-4752-a01d-6aadd074fcc0.webp",
+        "3198f5be-7a60-4e93-ba51-39fbd1207064.webp"
       ]
     },
     {
       "id": "nastya-venya",
       "category": "personal",
       "name": "Grom automative x mimibox",
-      "cover": "nastya-cover-hd.jpg"
+      "cover": "nastya-cover-hd.jpg",
+      "frames": [
+        "nastya-cover-hd.jpg",
+        "ef8fcc30-6c76-43ef-945a-08fa684a27f3.webp",
+        "d83c15ff-7abd-4227-b7a5-36fcbe556bcf.webp",
+        "c06a9bc4-8e3b-43c4-b324-745960e61a22.webp",
+        "a6e301bd-6470-41f3-91f2-89e91357f2d0.webp",
+        "37df3099-a05b-4281-b240-3afbe7bbdf98.webp",
+        "492c3dd0-9df6-45ef-ba09-e3d32b9d64c8.webp",
+        "c8165cec-a1dc-44a8-975a-90c019d320f4.webp",
+        "05071440-f8fe-4225-af3a-1ffe6e915f40.webp",
+        "f925ca62-8cec-4fc1-b35a-b0d3a881915a.webp",
+        "21136ed0-bc1b-4fc1-9815-0c6dea7e0df6.webp",
+        "f33770b8-bb91-4c01-8094-78a7e9ceb0b0.webp",
+        "5cffc6fe-5247-48f7-8a73-37dec7b1b76a.webp"
+      ]
     },
     {
       "id": "editorial-01",
@@ -36,14 +56,41 @@ const portfolioContent = {
       "id": "food-01",
       "category": "food",
       "name": "roomi x not only cod",
-      "cover": "food-1-hd.jpg"
+      "cover": "food-1-hd.jpg",
+      "frames": [
+        "food-1-hd.jpg",
+        "a5aeee0a-c10b-438c-b513-f24102e407a5.webp",
+        "c23401e8-c9cd-4ae0-8ba4-613248eddea7.webp",
+        "02eae3fc-e3e1-4ea9-86fa-40bd42b1883f.webp",
+        "66765520-a74b-4dce-91e0-1c6767b5d9f2.webp",
+        "e65c9ddb-203c-4c35-b0d5-ce03e25ac942.webp",
+        "144456ce-b216-467d-bb58-715fef7542fb.webp",
+        "bb7810a8-3913-4a2a-ae3a-d34d3467823d.webp"
+      ]
+    },
+    {
+      "id": "681db820-e54b-43e3-9149-8f48898e9c01",
+      "category": "food",
+      "name": "roomi новое меню",
+      "cover": "bbb689bb-0ea6-47c2-9381-a8ebbd513932.webp",
+      "frames": [
+        "bbb689bb-0ea6-47c2-9381-a8ebbd513932.webp",
+        "d5554ae1-1479-450e-aef9-9c5e4f4bddc9.webp",
+        "988530f8-d96e-4b1f-b9f6-b4a83d0f1a56.webp",
+        "0ae08a90-5efa-4cc6-acd1-ecb635fa1ed2.webp",
+        "b0825f60-0b2d-473c-b564-29b7d3d91d45.webp",
+        "db782170-51cf-4f81-af81-31af8358d440.webp",
+        "1d831983-1c6d-4b73-a3c4-a485b1e94f2b.webp",
+        "c1805095-8b1a-4e2b-b1f9-890b0eebcd35.webp"
+      ]
     }
   ],
   "allOrder": [
     "kristina-demidova",
     "editorial-01",
     "nastya-venya",
-    "food-01"
+    "food-01",
+    "681db820-e54b-43e3-9149-8f48898e9c01"
   ],
   "conditions": {
     "personal": {
