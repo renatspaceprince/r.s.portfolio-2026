@@ -23,31 +23,19 @@ const portfolioContent = {
     {
       "id": "nastya-venya",
       "category": "personal",
-      "name": "Настя Веня",
+      "name": "Grom automative x mimibox",
       "cover": "nastya-cover-hd.jpg"
-    },
-    {
-      "id": "catalog-01",
-      "category": "catalog",
-      "name": "съёмка 01",
-      "cover": "all-4-hd.jpg"
-    },
-    {
-      "id": "catalog-02",
-      "category": "catalog",
-      "name": "съёмка 02",
-      "cover": "catalog-1-hd.jpg"
     },
     {
       "id": "editorial-01",
       "category": "editorial",
-      "name": "съёмка 01",
+      "name": "Cheesy x Малиновое поле",
       "cover": "all-2-hd.jpg"
     },
     {
       "id": "food-01",
       "category": "food",
-      "name": "съёмка 01",
+      "name": "roomi x not only cod",
       "cover": "food-1-hd.jpg"
     }
   ],
@@ -55,8 +43,6 @@ const portfolioContent = {
     "kristina-demidova",
     "editorial-01",
     "nastya-venya",
-    "catalog-01",
-    "catalog-02",
     "food-01"
   ],
   "conditions": {
