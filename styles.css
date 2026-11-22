@@ -187,15 +187,9 @@ address { font-style: normal; }
 .strip > * { height: auto; aspect-ratio: 122.621 / 160.935; }
 @media (prefers-reduced-motion: no-preference) {
   .strip { overflow: hidden; isolation: isolate; }
-  .strip > * { animation: reveal-preview 220ms ease-out backwards; }
   .strip > :first-child { z-index: 3; }
-  .strip > :nth-child(2) { z-index: 2; animation-delay: 45ms; }
-  .strip > :nth-child(3) { z-index: 1; animation-delay: 90ms; }
-  .strip > :nth-child(4) { animation-delay: 135ms; }
-}
-@keyframes reveal-preview {
-  from { transform: translateX(calc(-100% - .6875rem)); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  .strip > :nth-child(2) { z-index: 2; }
+  .strip > :nth-child(3) { z-index: 1; }
 }
 .terms-back {
   display: inline-flex;
