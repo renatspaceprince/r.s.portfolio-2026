@@ -1,28 +1,13 @@
 'use strict';
 
-const categories = {
-  personal: 'персональные / контент',
-  catalog: 'каталог товаров',
-  editorial: 'имиджевые',
-  food: 'фуд-фото',
-};
-
-// Only the first personal shoot has a complete gallery in Figma.
-const shoots = [
-  {
-    id: 'kristina-demidova', category: 'personal', name: 'Кристина Демидова',
-    cover: 'kristina-cover-hd.jpg',
-    frames: ['kristina-cover-hd.jpg', 'kristina-2-hd.jpg', 'kristina-3-hd.jpg', 'kristina-4-hd.jpg', 'kristina-5-hd.jpg', 'kristina-cover-hd.jpg'],
-  },
-  { id: 'nastya-venya', category: 'personal', name: 'Настя Веня', cover: 'nastya-cover-hd.jpg' },
-  { id: 'catalog-01', category: 'catalog', name: 'съёмка 01', cover: 'all-4-hd.jpg' },
-  { id: 'catalog-02', category: 'catalog', name: 'съёмка 02', cover: 'catalog-1-hd.jpg' },
-  { id: 'editorial-01', category: 'editorial', name: 'съёмка 01', cover: 'all-2-hd.jpg' },
-  { id: 'food-01', category: 'food', name: 'съёмка 01', cover: 'food-1-hd.jpg' },
-];
-
-// Keep the image order and the two repeated covers in the All Works frame.
-const allWorks = [shoots[0], shoots[4], shoots[1], shoots[2], shoots[4], shoots[0]];
+// Text from the editor is escaped before insertion into HTML.
+const escapeText = value => value.replace(/[&<>"']/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+})[char]);
+const { categories, shoots, conditions, allOrder } = JSON.parse(
+  JSON.stringify(portfolioContent), (_, value) => typeof value === 'string' ? escapeText(value) : value
+);
+const allWorks = allOrder.map(id => shoots.find(item => item.id === id)).filter(Boolean);
 
 const servicePreviews = {
   personal: ['kristina-2-hd.jpg', 'personal-2-hd.jpg', 'kristina-3-hd.jpg', 'kristina-cover-hd.jpg'],
@@ -78,7 +63,7 @@ function mainNav(page) {
 
 function categoryNav(page, category) {
   const terms = page === 'terms';
-  const entries = [['', terms ? 'все' : 'все работы'], ...Object.entries(categories)];
+  const entries = [['', terms ? 'все' : 'все работы'], ...Object.entries(categories).filter(([id]) => !terms || Object.hasOwn(conditions, id))];
   if (terms) entries.push(['creative', 'креатив / организация']);
   return list('Разделы', 'upper categories', entries.map(([id, label]) =>
     link(path(page, id), label, id === category)).join(''));

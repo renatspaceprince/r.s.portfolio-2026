@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com; img-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Управление портфолио</title><link rel="stylesheet" href="admin.css"><script defer src="admin.js"></script></head>
+<body><header><strong>spaceprince</strong><a href="../" target="_blank" rel="noopener">Открыть сайт ↗</a></header>
+<main><section id="login"><h1>Управление портфолио</h1><p>Для входа нужен токен GitHub аккаунта renatspaceprince. Он действует в этой вкладке до её закрытия или обновления.</p>
+<details><summary>Как получить токен</summary><p>Откройте <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">создание fine-grained token</a>. Введите название «Панель портфолио», выберите срок действия. В Repository access укажите Only select repositories → r.s.portfolio-2026. В Repository permissions выберите Contents → Read and write. Нажмите Generate token и вставьте его ниже.</p></details>
+<form id="auth"><label>Токен GitHub<input id="token" type="password" required autocomplete="off"></label><button class="primary">Войти</button></form></section>
+<section id="workspace" hidden><div class="toolbar"><nav><button id="shootTab">Съёмки</button><button id="priceTab">Прайс</button></nav><button id="publish" class="primary">Опубликовать</button><button id="logout">Выйти</button></div>
+<div class="columns"><aside id="menu"></aside><article id="edit"></article></div></section><p id="status" role="status" aria-live="polite"></p></main></body></html>
