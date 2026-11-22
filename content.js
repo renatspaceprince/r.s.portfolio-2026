@@ -26,8 +26,14 @@ const portfolioContent = {
       ]
     },
     {
+      "id": "editorial-01",
+      "category": "editorial",
+      "name": "Cheesy x Малиновое поле",
+      "cover": "all-2-hd.jpg"
+    },
+    {
       "id": "nastya-venya",
-      "category": "personal",
+      "category": "editorial",
       "name": "Grom automative x mimibox",
       "cover": "nastya-cover-hd.jpg",
       "frames": [
@@ -45,12 +51,6 @@ const portfolioContent = {
         "f33770b8-bb91-4c01-8094-78a7e9ceb0b0.webp",
         "5cffc6fe-5247-48f7-8a73-37dec7b1b76a.webp"
       ]
-    },
-    {
-      "id": "editorial-01",
-      "category": "editorial",
-      "name": "Cheesy x Малиновое поле",
-      "cover": "all-2-hd.jpg"
     },
     {
       "id": "food-01",
