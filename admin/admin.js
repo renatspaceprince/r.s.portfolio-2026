@@ -102,21 +102,34 @@ const folded = new Set();
 async function asWebP(file) {
   const bitmap = await createImageBitmap(file);
   try {
-    if (file.type === 'image/webp') {
+    const longSide = Math.max(bitmap.width, bitmap.height);
+    const targetBytes = 600_000;
+    if (file.type === 'image/webp' && longSide <= 2400 && file.size <= targetBytes) {
       const header = await file.slice(0, 12).text();
       if (header.startsWith('RIFF') && header.endsWith('WEBP')) return file;
     }
     const canvas = document.createElement('canvas');
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
     const context = canvas.getContext('2d');
     if (!context) throw Error('Недостаточно памяти для обработки фотографии.');
-    context.drawImage(bitmap, 0, 0);
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.95));
-    if (blob?.type !== 'image/webp') {
-      throw Error('Браузер не смог создать WebP. Откройте панель в Arc или Chrome либо выберите готовый WebP.');
+    let result;
+    for (const limit of [2400, 1920, 1500]) {
+      const scale = Math.min(1, limit / longSide);
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      if (result && width === canvas.width && height === canvas.height) continue;
+      canvas.width = width;
+      canvas.height = height;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(bitmap, 0, 0, width, height);
+      for (const quality of [0.88, 0.82]) {
+        result = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', quality));
+        if (result?.type !== 'image/webp') {
+          throw Error('Браузер не смог создать WebP. Откройте панель в Arc или Chrome.');
+        }
+        if (result.size <= targetBytes) return result;
+      }
     }
-    return blob;
+    return result;
   } finally {
     bitmap.close();
   }
