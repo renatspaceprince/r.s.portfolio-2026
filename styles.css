@@ -125,7 +125,7 @@ address { font-style: normal; }
   aspect-ratio: 209 / 253;
   overflow: hidden;
 }
-.about-services, .about-clients {
+.about-services {
   position: absolute;
   left: 50%;
   right: 10.75%;
@@ -133,7 +133,15 @@ address { font-style: normal; }
 .about-services { top: var(--top); }
 .about-services .muted { margin-top: 2.244rem; }
 .about-services b { color: var(--ink); }
-.about-clients { top: calc(var(--top) + 35.395rem); }
+@media (min-width: 841px) {
+  .about-bottom {
+    position: absolute; top: calc(var(--top) + 35.395rem); left: 10.6944%; right: 10.75%;
+    display: grid; grid-template-columns: 50% 1fr; align-items: end;
+  }
+  .about-clients { grid-area: 1 / 2; }
+  .page-about .about-bottom .booking-button { position: static; grid-area: 1 / 1; justify-self: start; }
+}
+@media (max-width: 840px) { .about-bottom { display: contents; } }
 .about-clients .muted { margin-top: .605rem; text-transform: lowercase; }
 .about-services span, .about-clients span { display: block; }
 .about-name {
@@ -410,4 +418,64 @@ address { font-style: normal; }
 }
 @media (prefers-reduced-motion: reduce) {
   .contact-links a, .contact-links a::after { transition: none; }
+}
+
+:root { --blue: #4b70ce; --blue-active: #3a5baf; }
+.layout :is(.categories, .shoot-links, .contact-links) a { color: var(--blue); }
+.layout :is(.categories, .shoot-links, .contact-links) a:is(:hover, :focus-visible, [aria-current]) { color: var(--blue-active); }
+.booking-button {
+  position: absolute; z-index: 1; right: var(--menu-right, var(--edge)); top: var(--top);
+  font: inherit; line-height: 1; cursor: pointer; padding: .5rem 1.25rem .625rem;
+  border: 1px solid var(--blue); background: white; color: var(--blue);
+  transition: background-color .16s, color .16s;
+}
+.page-home .booking-button { left: var(--edge); right: auto; }
+.page-about .booking-button { background: transparent; }
+.page-about .booking-button:is(:hover, :focus-visible) { background: var(--blue); }
+.booking-button:is(:hover, :focus-visible), .page-terms .booking-button { background: var(--blue); color: white; }
+.page-terms .booking-button:is(:hover, :focus-visible) { background: white; color: var(--blue); }
+
+body:has(#booking[open]) { overflow: hidden; }
+#booking {
+  width: min(49.75rem, calc(100vw - 2rem)); height: min(44.25rem, calc(100dvh - 2rem));
+  max-height: none; max-width: none; margin: auto; padding: 2.5rem 3rem;
+  border: 0; border-radius: 1.25rem; background: white; color: var(--ink); overflow: auto;
+  font-size: max(14px, 1rem);
+}
+#booking::backdrop { background: rgb(0 0 0 / .38); }
+#booking h2 { margin: 0 2rem 1.6rem 0; font: 400 2.8rem/1.05 "Noto Serif Local", Georgia, serif; letter-spacing: -.045em; }
+#booking button, #booking input, #booking textarea, #booking select { font: inherit; }
+.booking-close { position: absolute; right: 1.4rem; top: 1.25rem; width: 38px; height: 38px; border: 0; border-radius: 50%; background: #f1f3f8; cursor: pointer; }
+#booking .booking-close { font-size: 1.65rem; }
+#booking-form:not([hidden]), #booking fieldset { display: grid; gap: 1rem; }
+.booking-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+#booking label { display: grid; gap: .4rem; min-width: 0; }
+#booking :is(input:not([type=radio]), select, textarea) {
+  width: 100%; min-width: 0; padding: .7em .85em; border: 1px solid #cfd4df;
+  background: #fafbfe; border-radius: .55rem; color: var(--ink);
+}
+#booking textarea { resize: vertical; }
+#booking input::file-selector-button { color: var(--blue-active); border: 0; background: #e9efff; border-radius: .3rem; cursor: pointer; }
+#booking :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+#booking fieldset { border: 0; padding: 0; margin: 0; min-width: 0; gap: .7rem; }
+#booking legend { padding: 0; margin-bottom: .5rem; }
+.booking-channels, .booking-thumbs { display: flex; flex-wrap: wrap; gap: .45rem; }
+.booking-thumbs:empty { display: none; }
+.booking-thumbs img { width: 3rem; height: 3rem; object-fit: cover; border-radius: .4rem; }
+.booking-channels label { position: relative; cursor: pointer; }
+.booking-channels input { position: absolute; opacity: 0; }
+.booking-channels span { padding: .45em .85em; border-radius: 2em; background: #f2f3f5; }
+.booking-channels input:checked + span { color: var(--blue-active); background: #e8eeff; box-shadow: inset 0 0 0 1px var(--blue); }
+.booking-channels input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+.booking-submit, .booking-edit { justify-self: start; padding: .72em 1.3em; border: 0; border-radius: .55rem; background: var(--blue); color: white; cursor: pointer; }
+.booking-result:not([hidden]) { display: grid; gap: 1rem; margin-top: 3rem; }
+@media (max-width: 840px) {
+  .layout .booking-button { position: static; align-self: flex-start; order: 1; margin: .5rem var(--mobile-edge) 1rem; }
+  .page-about .booking-button { grid-column: 1 / -1; justify-self: start; }
+  #booking { padding: 1.6rem; height: auto; max-height: calc(100dvh - 2rem); }
+  #booking h2 { font-size: 2rem; }
+}
+@media (max-width: 560px) {
+  .booking-row { grid-template-columns: 1fr; }
+  #booking { font-size: 16px; }
 }

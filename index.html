@@ -8,8 +8,37 @@
   <link rel="stylesheet" href="./styles.css">
   <script defer src="./content.js"></script>
   <script defer src="./site.js"></script>
+  <script defer src="./booking.js"></script>
 </head>
 <body>
   <div id="site"></div>
+  <dialog id="booking" aria-labelledby="booking-title">
+    <button class="booking-close" type="button" aria-label="Закрыть">×</button>
+    <h2 id="booking-title">Заказать съёмку</h2>
+    <form id="booking-form">
+      <div class="booking-row">
+        <label>Ваше имя<input name="name" autocomplete="name" required placeholder="Имя"></label>
+        <label>Какой формат съёмки интересует?<select name="format" required><option value="">Выберите формат</option></select></label>
+      </div>
+      <label>Пожелания к съёмке<textarea name="idea" rows="2" placeholder="Расскажите об идее, месте или настроении"></textarea></label>
+      <div class="booking-row booking-refs">
+        <label>Ссылка на референсы<input type="url" name="reference" placeholder="https://pinterest.com/…"></label>
+        <label>Фотографии для примера<input type="file" name="photos" accept="image/*" multiple></label>
+      </div>
+      <div class="booking-thumbs"></div>
+      <fieldset><legend>Где с вами связаться?</legend>
+        <div class="booking-channels">
+          <label><input type="radio" name="channel" value="telegram" checked><span>Telegram</span></label>
+          <label><input type="radio" name="channel" value="vk"><span>ВКонтакте</span></label>
+          <label><input type="radio" name="channel" value="email"><span>Почта</span></label>
+          <label><input type="radio" name="channel" value="instagram"><span>Instagram</span></label>
+        </div>
+        <label><span id="booking-contact-label">Ник или номер телефона</span><input name="contact" required placeholder="@username или +7…"></label>
+      </fieldset>
+      <p class="booking-status" role="status"></p>
+      <button type="submit" class="booking-submit">Отправить заявку</button>
+    </form>
+    <section class="booking-result" hidden><p>В ближайшее время с вами свяжусь, спасибо!</p><button type="button" class="booking-edit">Закрыть окно</button></section>
+  </dialog>
 </body>
 </html>

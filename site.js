@@ -129,6 +129,8 @@ function termsDetail(category) {
   </article>`;
 }
 
+const bookingButton = '<button class="booking-button" type="button" aria-haspopup="dialog" aria-controls="booking">заказать съемку</button>';
+
 function about() {
   return `<div class="about-portrait">${photo('portrait-about.jpg', 'Портрет Рената Егорова')}</div>
     <div class="about-services">
@@ -136,10 +138,10 @@ function about() {
       <p class="muted">${lines(['имиджевых', 'каталожных', 'персональных'])}<span>контент <b>— съемок</b></span></p>
     </div>
     <h1 class="about-name">Ренат <em>Егоров</em></h1>
-    <div class="about-clients">
+    <div class="about-bottom"><div class="about-clients">
       <p>${lines(['За 5+ лет опыта поработал', 'с такими проектами, как:'])}</p>
       <p class="muted">MIXIT, Буквоед, Улыбка радуги, Пассворк, РЖД, Шоколадница, VOSQ, Доска треска, Alena Malygina, Правда севера, почтовая контора, roomi</p>
-    </div>`;
+    </div>${bookingButton}</div>`;
 }
 
 let previousRoute;
@@ -215,7 +217,6 @@ async function render() {
     const closing = menus.map(selector => site.querySelector(selector)).filter(Boolean);
     const exits = closing.map(node => animateMenu(node, false));
     if (previousPage === 'terms' && page !== 'terms') {
-      exits.push(animateMenu(site.querySelector('.contact-links'), false));
       const photos = Array.from(site.querySelectorAll('.strip > *')).reverse();
       photos.forEach((photo, index) => {
         const style = getComputedStyle(photo);
@@ -252,8 +253,9 @@ async function render() {
     body = category ? termsDetail(category) : termsOverview();
   }
 
+
   site.innerHTML = `<div class="layout page-${page}">
-    <aside class="sidebar">${mainNav(page)}${page === 'terms' ? `<address class="terms-links" aria-label="Контакты">${contactLinks}</address>` : ''}${upper}${lower}</aside>
+    <aside class="sidebar">${mainNav(page)}${upper}${lower}${page === 'terms' || page === 'home' ? bookingButton : ''}</aside>
     <main id="content" class="content" tabindex="-1">${body}</main>
   </div>`;
 
@@ -273,7 +275,7 @@ async function render() {
       if (node) animateMenu(node, true);
     }
   }
-  if (motion && (page === 'about' || page === 'terms') && previousPage !== page) {
+  if (motion && page === 'about' && previousPage !== page) {
     animateMenu(site.querySelector('.contact-links'), true);
   }
   previousCategory = category;
