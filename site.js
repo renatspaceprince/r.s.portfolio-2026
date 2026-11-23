@@ -52,14 +52,15 @@ const contacts = `<address class="upper contacts">
 </address>`;
 
 function readRoute() {
-  const [page, section, shootId, ...rest] = location.hash.replace(/^#\/?/, '').split('/');
+  const [route, query] = location.hash.split('?');
+  const [page, section, shootId, ...rest] = route.replace(/^#\/?/, '').split('/');
   if (rest.length || !['about', 'portfolio', 'terms'].includes(page)) return { page: 'home' };
   if (page === 'about') return { page };
 
   const validSection = page === 'terms' ? Object.hasOwn(conditions, section) : Object.hasOwn(categories, section);
   const category = validSection ? section : '';
   const shoot = page === 'portfolio' && shoots.find(item => item.id === shootId && item.category === category);
-  return { page, category, shoot };
+  return { page, category, shoot, fromAll: !!shoot && new URLSearchParams(query).get('from') === 'all' };
 }
 
 function mainNav(page) {
@@ -89,17 +90,27 @@ function previewStrip(category) {
   </div>`;
 }
 
-function photos(category, shoot, works) {
-  if (shoot) return `<h1 class="visually-hidden">${shoot.name}</h1>
-    <div class="photos shoot-grid" data-shoot="${shoot.id}">
-      ${(shoot.frames || [shoot.cover]).map((file, index) => photo(file, `${shoot.name}, кадр ${index + 1}`, index > 1)).join('')}
-    </div>`;
-
+function photos(category, shoot, works, fromAll) {
+  const all = !category || fromAll;
+  const sections = Object.entries(categories).filter(([id]) => all || id !== category);
+  if (!all) sections.unshift(['', 'все работы']);
+  const nav = list('Разделы портфолио', 'portfolio-footer',
+    sections.map(([id, label]) => link(path('portfolio', id), label)).join('') +
+    '<a class="portfolio-terms m-action" href="'+path('terms')+'">перейти к&nbsp;условиям</a>');
+  const covers = items => items.map((item, index) => `<a class="cover" href="${path('portfolio', item.category, item.id)}${all ? '?from=all' : ''}"
+    aria-label="${categories[item.category]} · ${item.name}">${photo(item.cover, '', index > 1)}<span class="cover-name">${item.name}</span></a>`).join('');
+  if (shoot) {
+    const relatedTitles = { catalog: 'другие каталожные съёмки', editorial: 'другие имиджевые съёмки', food: 'другие фуд-съёмки', personal: 'другие персональные / контент съёмки' };
+    const relatedTitle = all ? 'другие съёмки' : relatedTitles[category] || 'другие съёмки';
+    const others = (all ? allWorks : works).filter(item => item.id !== shoot.id);
+    return `<h1 class="visually-hidden">${shoot.name}</h1>
+      <div class="photos shoot-grid" data-shoot="${shoot.id}">
+        ${(shoot.frames || [shoot.cover]).map((file, index) => `<button type="button" class="frame-open" aria-haspopup="dialog">${photo(file, shoot.name + ', кадр ' + (index + 1), index > 1)}</button>`).join('')}
+      </div>
+      ${others.length ? '<section class="related-work"><h2>'+relatedTitle+'</h2><div class="photos all-grid">'+covers(others)+'</div></section>' : ''}${nav}`;
+  }
   return `<h1 class="visually-hidden">${category ? categories[category] : 'все работы'}</h1>
-    <div class="photos ${category ? 'category-grid' : 'all-grid'}">
-      ${works.map((item, index) => `<a class="cover" href="${path('portfolio', item.category, item.id)}"
-        aria-label="${categories[item.category]} · ${item.name}">${photo(item.cover, '', index > 1)}<span class="cover-name">${item.name}</span></a>`).join('')}
-    </div>`;
+    <div class="photos ${category ? 'category-grid' : 'all-grid'}">${covers(works)}</div>${nav}`;
 }
 
 function termsOverview() {
@@ -133,12 +144,12 @@ function termsDetail(category) {
 
 const bookingButton = '<button class="booking-button" type="button" aria-haspopup="dialog" aria-controls="booking">заказать съемку</button>';
 
+const servicesCopy = `<p>разработка креативов<br>продюсирование<br>и проведение</p>
+  <p class="muted">имиджевых каталожных<br>персональных и контент<span class="services-end">— съёмок</span></p>`;
+
 function about() {
   return `<div class="about-portrait">${photo('portrait-about.jpg', 'Портрет Рената Егорова')}</div>
-    <div class="about-services">
-      <p>${lines(['разработка креативов', 'продюсирование', 'и проведение'])}</p>
-      <p class="muted">${lines(['имиджевых', 'каталожных', 'персональных'])}<span>контент <b>— съемок</b></span></p>
-    </div>
+    <div class="about-services">${servicesCopy}</div>
     <h1 class="about-name">Ренат <em>Егоров</em></h1>
     <div class="about-bottom"><div class="about-clients">
       <p>${lines(['За 5+ лет опыта поработал', 'с такими проектами, как:'])}</p>
@@ -209,6 +220,14 @@ async function render() {
   const state = readRoute();
   const { page, category, shoot } = state;
   const id = ++transitionId;
+  if (mobileViewport.matches) {
+    geometry.disconnect();
+    renderMobile(state);
+    previousPage = undefined;
+    previousCategory = undefined;
+    previousRoute = location.hash;
+    return;
+  }
   const menus = [];
   if (page !== previousPage) menus.push('.categories');
   if (page !== previousPage || category !== previousCategory) menus.push('.shoot-links');
@@ -247,7 +266,7 @@ async function render() {
   if (page === 'portfolio') {
     upper = categoryNav(page, category);
     if (category) lower = shootNav(category, shoot, works);
-    body = galleryTools(category, shoot) + photos(category, shoot, works);
+    body = galleryTools(category, shoot) + photos(category, shoot, works, state.fromAll);
   }
   if (page === 'terms') {
     upper = categoryNav(page, category);
@@ -293,5 +312,6 @@ async function render() {
   previousRoute = location.hash;
 }
 
+mobileViewport.addEventListener('change', render);
 window.addEventListener('hashchange', render);
 render();
